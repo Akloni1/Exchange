@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Money</title>
+</head>
+<body>
+    <div id="inputForm">
+        <input type="text" id="message" />
+        <input type="button" id="sendBtn" value="Изменить курс доллора"  />
+    </div>
+    <div id="chatroom"></div>
+    <script src="js/signalr/dist/browser/signalr.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        const hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chat")
+            .build();
+
+
+
+
+        hubConnection.on("Send", function (data) {
+            console.log("2");
+            let elem = document.createElement("p");
+            elem.appendChild(document.createTextNode(data));
+            let firstElem = document.getElementById("chatroom").firstChild;
+            document.getElementById("chatroom").insertBefore(elem, firstElem);
+
+        });
+
+
+
+
+        document.getElementById("sendBtn").addEventListener("click", function (e) {
+            var settings = {
+                "url": "https://localhost:44346/api/currency/2",
+                "method": "PUT",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "data": JSON.stringify({ "numCode": 840, "charCode": "USD", "nominal": 1, "name": "Доллар", "value": document.getElementById("message").value, "previous": 0 }),
+            };
+
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+            });
+
+
+            hubConnection.invoke("Send", "руб");
+        });
+
+        hubConnection.start();
+
+    </script>
+</body>
+</html>
